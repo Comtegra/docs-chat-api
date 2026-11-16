@@ -59,6 +59,15 @@ curl https://<name>-api.<namespace>.cgc-krk-01.comtegra.cloud/api/v1/health
 
 The service generated an index key on first boot and printed it once:
 
+> **Adding the port restarts the service**
+> `cgc compute port add` restarts the compute, and `cgc logs` shows only the current run — so the boot line with the key may already be gone. If it is, don't worry: generate your own key and hand the service its hash (the service then skips generating one):
+>
+> ```bash
+> RAW=$(openssl rand -hex 32)                      # your RAW index key — store it
+> HASH=$(printf %s "$RAW" | sha256sum | cut -d' ' -f1)
+> # recreate the service (step 2) with one more env: -e DOCS_CHAT_INDEX_KEYS=$HASH
+> ```
+
 ```bash
 cgc logs <name>-api
 # {"msg":"index key generated","DOCS_CHAT_INDEX_KEY":"<RAW>",...}
