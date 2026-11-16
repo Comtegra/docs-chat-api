@@ -1,0 +1,15 @@
+# Dołącz do .gitlab-ci.yml:  include: [ { local: 'docs-chat-kit/gitlab-ci.docs-chat.yml' } ]
+# Sekrety (Settings → CI/CD → Variables, DOCS_CHAT_INDEX_KEY jako masked): DOCS_CHAT_API_URL,
+# DOCS_CHAT_INDEX_KEY. Skrypty: docs-chat-kit/ przy root repo (ZIP z dokumentacji Docs Chat).
+docs-chat-index:
+  stage: deploy
+  image: python:3.12
+  variables:
+    DOCS_CHAT_API_URL: "${DOCS_CHAT_API_URL}"
+  script:
+    - pip install requests
+    # co wchodzi do bazy wiedzy: --include/--exclude (fnmatch, powtarzalne, exclude wygrywa)
+    - python docs-chat-kit/md_to_json.py docs -o corpus.json --locale pl
+    - python docs-chat-kit/send_json.py corpus.json
+  rules:
+    - if: $CI_COMMIT_TAG          # release = tag; do ręcznego odpalania dodaj when: manual

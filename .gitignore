@@ -1,0 +1,11 @@
+node_modules/
+coverage/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+npm-debug.log*
+__pycache__/
+
+# ZIP-y dystrybucyjne kita (buduje package.py, kopiowane do user-docs)
+docs-chat-kit/dist/

@@ -1,0 +1,56 @@
+name: docs-chat-index
+
+# Indeksuje markdowny do instancji docs-chat (CGC).
+# Setup (jednorazowy): rozpakuj docs-chat-kit (ZIP z dokumentacji Docs Chat) w root swojego repo,
+# przenieś ten plik do .github/workflows/, ustaw sekrety DOCS_CHAT_API_URL + DOCS_CHAT_INDEX_KEY
+# (Settings → Secrets → Actions).
+# Odpalanie: release (auto) albo Actions → docs-chat-index → Run workflow — parametry w UI,
+# bez edycji tego pliku.
+on:
+  release: { types: [published] }
+  workflow_dispatch:
+    inputs:
+      paths:
+        description: "Folder z markdownami (relatywnie do root repo)"
+        default: "docs"
+        required: false
+      include:
+        description: "fnmatch include; puste = wszystko"
+        default: ""
+        required: false
+      exclude:
+        description: "fnmatch exclude — kilka po przecinku (np. 'private/**,drafts/**')"
+        default: ""
+        required: false
+      locale:
+        description: "Kolekcja indeksu: en | pl"
+        default: "pl"
+        required: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install requests
+      - name: Build corpus
+        run: |
+          ARGS=""
+          if [ -n "$INCLUDE" ]; then ARGS="$ARGS --include $INCLUDE"; fi
+          for P in $(echo "$EXCLUDE" | tr ',' ' '); do
+            if [ -n "$P" ]; then ARGS="$ARGS --exclude $P"; fi
+          done
+          python docs-chat-kit/md_to_json.py "$PATHS" -o corpus.json --locale "$LOCALE" --source "$SOURCE" $ARGS
+        env:
+          PATHS: ${{ inputs.paths || 'docs' }}
+          INCLUDE: ${{ inputs.include }}
+          EXCLUDE: ${{ inputs.exclude }}
+          LOCALE: ${{ inputs.locale || 'pl' }}
+          SOURCE: ${{ github.event.repository.name }}
+      - name: Import to docs-chat
+        run: python docs-chat-kit/send_json.py corpus.json
+        env:
+          DOCS_CHAT_API_URL: ${{ secrets.DOCS_CHAT_API_URL }}
+          DOCS_CHAT_INDEX_KEY: ${{ secrets.DOCS_CHAT_INDEX_KEY }}

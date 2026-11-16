@@ -1,0 +1,12 @@
+.git
+.github
+node_modules
+tests
+docs
+coverage
+.vscode
+README.md
+tsconfig.ai.json
+.eslintrc.json
+.env
+.env.*

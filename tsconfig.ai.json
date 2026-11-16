@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "strict": true,
+    "noEmit": true,
+    "incremental": false,
+    "target": "es2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"]
+  },
+  "include": [
+    "lib/langfuseConfig.d.ts",
+    "lib/**/*.mjs",
+    "config/tenants/**/*.mjs",
+    "db/*.mjs",
+    "server/*.mjs"
+  ],
+  "exclude": ["node_modules"]
+}
